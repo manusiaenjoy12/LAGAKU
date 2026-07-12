@@ -25,6 +25,7 @@ import Navigation from "@/components/navigation/navigation";
 import Footer from "@/components/public/Footer";
 import { Acara } from "@/utils";
 import { toast } from "sonner";
+import { PublicKnockoutBracket } from "@/components/public/tournaments/PublicKnockoutBracket";
 
 interface TournamentWithDetails extends Acara {
   lokasi_lapangan?: string;
@@ -292,6 +293,10 @@ export default function TournamentDetailPage() {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="mb-8">
+          <PublicKnockoutBracket eventId={tournamentId} />
         </div>
 
         {/* Grid Layout */}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createClient } from "@/lib/supabase/client";
@@ -160,28 +160,31 @@ export default function KonfirmasiIdentitasPage() {
 
             {/* Jenis Kelamin */}
             <div>
-              <Select 
-                {...form.register("jenis_kelamin")}
-                defaultValue="L"
-              >
-                <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                  <SelectValue placeholder="Jenis Kelamin" />
-                </SelectTrigger>
-                <SelectContent className="dark:bg-gray-700 dark:border-gray-600">
-                  <SelectItem 
-                    value="L"
-                    className="dark:text-gray-300 dark:hover:bg-gray-600 dark:focus:bg-gray-600"
-                  >
-                    Laki-laki
-                  </SelectItem>
-                  <SelectItem 
-                    value="P"
-                    className="dark:text-gray-300 dark:hover:bg-gray-600 dark:focus:bg-gray-600"
-                  >
-                    Perempuan
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <Controller
+                control={form.control}
+                name="jenis_kelamin"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                      <SelectValue placeholder="Jenis Kelamin" />
+                    </SelectTrigger>
+                    <SelectContent className="dark:bg-gray-700 dark:border-gray-600">
+                      <SelectItem
+                        value="L"
+                        className="dark:text-gray-300 dark:hover:bg-gray-600 dark:focus:bg-gray-600"
+                      >
+                        Laki-laki
+                      </SelectItem>
+                      <SelectItem
+                        value="P"
+                        className="dark:text-gray-300 dark:hover:bg-gray-600 dark:focus:bg-gray-600"
+                      >
+                        Perempuan
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
               {form.formState.errors.jenis_kelamin && (
                 <p className="text-red-500 dark:text-red-400 text-sm">
                   {form.formState.errors.jenis_kelamin.message}

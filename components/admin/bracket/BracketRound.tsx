@@ -1,123 +1,89 @@
-// components/BracketRound.tsx
-import { Users, ChevronRight, Crown, Trophy } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Trophy } from "lucide-react";
 import { MatchCard } from "./MatchCard";
 import { BracketRoundData, getRoundDisplayName, isFinalRound } from "@/utils";
+
 interface BracketRoundProps {
   bracketRound: BracketRoundData;
   hasNextRound?: boolean;
+  roundIndex: number;
+  maxMatches: number;
 }
 
-export function BracketRound({ bracketRound, hasNextRound = false }: BracketRoundProps) {
+export function BracketRound({
+  bracketRound,
+  hasNextRound = false,
+  roundIndex,
+  maxMatches,
+}: BracketRoundProps) {
   const { round, matches, isPlaceholder = false } = bracketRound;
-  
   const displayName = getRoundDisplayName(round.nama, round.urutan, matches.length);
-  const byeMatches = matches.filter((m) => m.is_bye);
-  const normalMatches = matches.filter((m) => !m.is_bye);
-  const completedMatches = normalMatches.filter((m) => m.status === "selesai").length;
-  const isFinal = isFinalRound(normalMatches);
+  const visibleMatches = matches.filter((match) => !match.is_bye);
+  const byeMatches = matches.filter((match) => match.is_bye);
+  const isFinal = isFinalRound(visibleMatches);
+  const slotHeight = 142 * 2 ** roundIndex;
+  const boardHeight = Math.max(300, maxMatches * 142);
 
   return (
-    <div className={`min-w-[320px] flex-shrink-0 ${isPlaceholder ? "opacity-75" : ""}`}>
-      {/* Round Header */}
-      <div className="mb-4 pb-3 border-b">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <h3 className="font-bold text-lg tracking-tight">{displayName}</h3>
-            {isFinal && !isPlaceholder && (
-              <Badge className="bg-gradient-to-r from-amber-500 to-amber-600 text-white border-0">
-                FINAL
-              </Badge>
-            )}
-            {isPlaceholder && (
-              <Badge variant="outline" className="text-xs">
-                Preview
-              </Badge>
-            )}
-          </div>
-          <Badge variant="secondary" className="font-mono">
-            R{round.urutan}
-          </Badge>
+    <section className={`w-[280px] shrink-0 ${isPlaceholder ? "opacity-70" : ""}`}>
+      <header className="sticky top-0 z-20 mb-4 border-b bg-background/95 pb-3 text-center backdrop-blur">
+        <div className="flex items-center justify-center gap-2">
+          {isFinal && <Trophy className="h-4 w-4 text-amber-500" />}
+          <h3 className="font-semibold text-foreground">{displayName}</h3>
         </div>
-        
-        {/* Round Stats */}
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Users className="h-3 w-3" />
-            <span>{normalMatches.length} match</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="h-1.5 w-1.5 rounded-full bg-green-500"></div>
-            <span>{completedMatches} selesai</span>
-          </div>
-          {byeMatches.length > 0 && (
-            <div className="flex items-center gap-1">
-              <Crown className="h-3 w-3 text-amber-500" />
-              <span>{byeMatches.length} bye</span>
-            </div>
-          )}
-        </div>
-      </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {visibleMatches.length} pertandingan
+        </p>
+      </header>
 
-      {/* Matches */}
-      <div className="space-y-4">
-        {normalMatches.map((match, index) => (
-          <div key={match.id} className="relative group">
-            <MatchCard match={match} />
-            
-            {/* Connector Arrow */}
-            {hasNextRound && !isPlaceholder && (
-              <div className="absolute top-1/2 -right-4 transform -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-primary/20 blur-sm rounded-full"></div>
-                  <ChevronRight className="h-5 w-5 text-primary relative" />
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
+      <div className="relative" style={{ height: boardHeight }}>
+        {visibleMatches.map((match, index) => {
+          const top = index * slotHeight + slotHeight / 2 - 55;
+          const pairOffset = slotHeight / 2;
+          const isUpper = index % 2 === 0;
 
-        {/* Bye Matches Section */}
-        {byeMatches.length > 0 && (
-          <div className="pt-4 border-t">
-            <div className="text-xs font-medium text-muted-foreground mb-2">
-              Tim dengan BYE
-            </div>
-            <div className="space-y-2">
-              {byeMatches.map((match) => (
-                <div
-                  key={match.id}
-                  className="bg-gradient-to-r from-amber-500/10 to-amber-600/10 border border-amber-200 dark:border-amber-800 rounded-lg p-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Crown className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-                      <span className="text-sm font-medium">
-                        {match.tim_a?.nama || "TBD"}
-                      </span>
-                    </div>
-                    <Badge variant="outline" className="text-xs border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400">
-                      BYE
-                    </Badge>
-                  </div>
-                  <div className="mt-1 text-xs text-amber-600 dark:text-amber-500">
-                    Langsung lolos ke round berikutnya
-                  </div>
+          return (
+            <div
+              key={match.id}
+              className="absolute left-0 w-full"
+              style={{ top }}
+            >
+              <MatchCard match={match} />
+
+              {hasNextRound && (
+                <div className="pointer-events-none absolute left-full top-1/2 hidden w-8 md:block">
+                  <span className="absolute left-0 top-0 h-px w-4 bg-border" />
+                  <span
+                    className="absolute left-4 w-px bg-border"
+                    style={{
+                      top: isUpper ? 0 : -pairOffset,
+                      height: pairOffset,
+                    }}
+                  />
+                  <span
+                    className="absolute left-4 h-px w-4 bg-border"
+                    style={{ top: isUpper ? pairOffset : -pairOffset }}
+                  />
                 </div>
-              ))}
+              )}
             </div>
+          );
+        })}
+
+        {visibleMatches.length === 0 && (
+          <div className="absolute left-0 top-1/2 w-full -translate-y-1/2 rounded-xl border border-dashed p-5 text-center text-sm text-muted-foreground">
+            Menunggu pertandingan
           </div>
         )}
       </div>
 
-      {/* Final Champion Badge */}
-      {isFinal && matches.length > 0 && !isPlaceholder && matches[0].status === "selesai" && (
-        <div className="absolute -top-2 -right-2 animate-pulse">
-          <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-            🏆 JUARA
-          </div>
+      {byeMatches.length > 0 && (
+        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950/30">
+          <p className="text-xs font-semibold text-amber-800 dark:text-amber-300">Lolos otomatis (BYE)</p>
+          <p className="mt-1 text-sm text-amber-700 dark:text-amber-400">
+            {byeMatches.map((match) => match.tim_a?.nama || "TBD").join(", ")}
+          </p>
         </div>
       )}
-    </div>
+    </section>
   );
 }

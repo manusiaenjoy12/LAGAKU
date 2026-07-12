@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { AlertCircle as AlertCircleIcon } from "lucide-react";
-import { Acara, BracketRoundData, Round, StatsData, Pertandingan } from "@/utils";
+import { Acara, BracketRoundData, Round, StatsData, Pertandingan, getRoundDisplayName } from "@/utils";
 import { LoadingBracket } from "@/components/admin/bracket/LoadingBracket";
 import { BracketHeader } from "@/components/admin/bracket/BracketHeader";
 import { EmptyBracket } from "@/components/admin/bracket/EmpatyBracket";
@@ -281,14 +281,28 @@ export default function BracketPage() {
           <EmptyBracket acaraId={acaraId} onCreateMatch={handleCreateMatch} />
         ) : (
           <>
-            <div className="flex overflow-x-auto gap-6 pb-4 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+            <div className="rounded-2xl border bg-card p-4 shadow-sm md:p-6">
+              <div className="mb-5 flex items-center gap-2 overflow-x-auto border-b pb-3">
+                {bracketRounds.map((item, index) => (
+                  <span
+                    key={item.round.id}
+                    className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium ${index === bracketRounds.length - 1 ? "border border-foreground bg-muted text-foreground" : "bg-muted/70 text-muted-foreground"}`}
+                  >
+                    {getRoundDisplayName(item.round.nama, item.round.urutan, item.matches.length)}
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-8 overflow-x-auto pb-6 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
               {bracketRounds.map((bracketRound, index) => (
                 <BracketRound
                   key={bracketRound.round.id}
                   bracketRound={bracketRound}
                   hasNextRound={index < bracketRounds.length - 1}
+                  roundIndex={index}
+                  maxMatches={Math.max(...bracketRounds.map((item) => item.matches.filter((match) => !match.is_bye).length), 1)}
                 />
               ))}
+              </div>
             </div>
 
             <BracketStats stats={stats} />
