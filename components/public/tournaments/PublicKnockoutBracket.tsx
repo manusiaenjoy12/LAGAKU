@@ -41,7 +41,8 @@ export function PublicKnockoutBracket({ eventId }: { eventId: string }) {
             tim_a: teams.find((team) => team.id === match.tim_a_id),
             tim_b: teams.find((team) => team.id === match.tim_b_id),
             round,
-          })),
+          }))
+          .sort((a, b) => (a.posisi ?? 0) - (b.posisi ?? 0)),
       })) as BracketRoundData[];
 
       setRounds(bracketData);

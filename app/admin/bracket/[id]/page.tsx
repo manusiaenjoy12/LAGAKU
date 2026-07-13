@@ -113,7 +113,7 @@ export default function BracketPage() {
             min_tim: round.min_tim ?? 2,
             max_tim: round.max_tim ?? 2,
           },
-        }));
+        })).sort((a, b) => (a.posisi ?? 0) - (b.posisi ?? 0));
 
         roundsWithMatches.push({
           round: {

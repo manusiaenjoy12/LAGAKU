@@ -273,6 +273,7 @@ export interface Round {
 // =======================================================
 export interface Pertandingan {
   id: string;
+  posisi?: number;
   status: EnumStatusMatch;
   tanggal_pertandingan?: string;
   waktu_pertandingan?: string;
