@@ -30,9 +30,13 @@ import { createClient } from "@/lib/supabase/client";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Footer from "@/components/public/Footer";
 import Link from "next/link";
+import { LiveScoreSection } from "@/components/home/LiveScoreSection";
+import { StudentIdentityCard } from "@/components/home/StudentIdentityCard";
 
 export default function HomePage() {
-  const [selectedStatus, setSelectedStatus] = useState("berlangsung");
+  // Pertandingan mendatang menjadi rekomendasi utama; live score tetap muncul
+  // otomatis di atas ketika ada pertandingan yang sedang berlangsung.
+  const [selectedStatus, setSelectedStatus] = useState("dijadwalkan");
   const [page, setPage] = useState(1);
   const [stats, setStats] = useState({
     tournaments: 0,
@@ -148,11 +152,19 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 text-gray-900 dark:text-white transition-colors duration-300">
+    <div className="flex min-h-screen flex-col bg-linear-to-br from-gray-50 via-white to-gray-100 text-gray-900 transition-colors duration-300 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 dark:text-white">
       <Navigation />
 
+      <div className="order-1">
+        <LiveScoreSection />
+      </div>
+
+      <div className="order-3 container mx-auto px-4 pt-6">
+        <StudentIdentityCard />
+      </div>
+
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
+      <div className="order-4 relative overflow-hidden">
         {/* Background Effects */}
         <div className="absolute inset-0 bg-linear-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 dark:from-blue-500/10 dark:via-purple-500/10 dark:to-pink-500/10" />
 
@@ -238,7 +250,7 @@ export default function HomePage() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="order-2 container mx-auto px-4 py-6">
         <Card className="border border-gray-200 dark:border-gray-800 shadow-lg">
           <CardHeader className="pb-4 my-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -311,8 +323,8 @@ export default function HomePage() {
         </Card>
       </div>
 
-      <FeaturesSection />
-      <Footer />
+      <div className="order-5"><FeaturesSection /></div>
+      <div className="order-6"><Footer /></div>
     </div>
   );
 }

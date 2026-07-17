@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "LIGAKU - Tournament Management",
+  title: "LAGAKU - Platform Turnamen Mahasiswa",
   description: "Sistem Manajemen Turnamen dan Pertandingan",
 };
 

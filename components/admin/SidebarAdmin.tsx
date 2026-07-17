@@ -138,7 +138,7 @@ export function SidebarAdmin() {
             </div>
             <div>
               <h1 className="text-xl font-bold bg-linear-to-r from-foreground to-primary bg-clip-text text-transparent">
-                LIGAKU
+                LAGAKU
               </h1>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Tournament Manager

@@ -144,7 +144,7 @@ export default function Navigation() {
                   <Trophy className="h-4 w-4 text-white" />
                 </div>
                 <span className="text-lg font-bold tracking-tight hidden sm:inline">
-                  LigaKu
+                  LAGAKU
                 </span>
               </Link>
 

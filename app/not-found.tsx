@@ -204,7 +204,7 @@ export default function NotFoundPage() {
         {/* Footer */}
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} LIGAKU • Tournament Management System
+            © {new Date().getFullYear()} LAGAKU • Platform Turnamen Mahasiswa
           </p>
           <p className="mt-1 text-xs text-muted-foreground/60">
             Jika Anda yakin ini adalah kesalahan,{" "}

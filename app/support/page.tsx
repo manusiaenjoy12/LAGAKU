@@ -202,9 +202,9 @@ export default function SupportPage() {
                     </div>
                   </div>
                   <CardTitle className="mb-2 text-lg">Email Support</CardTitle>
-                  <CardDescription>support@ligaku.com</CardDescription>
+                  <CardDescription>support@lagaku.id</CardDescription>
                   <Button variant="ghost" className="mt-4 w-full" asChild>
-                    <a href="mailto:support@ligaku.com">Kirim Email</a>
+                    <a href="mailto:support@lagaku.id">Kirim Email</a>
                   </Button>
                 </CardContent>
               </Card>
@@ -460,7 +460,7 @@ export default function SupportPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <div className="text-center md:text-left">
-              <h3 className="text-lg font-bold">LIGAKU Support</h3>
+              <h3 className="text-lg font-bold">LAGAKU Support</h3>
               <p className="text-sm text-muted-foreground">
                 Selalu siap membantu Anda mencapai yang terbaik
               </p>
@@ -488,7 +488,7 @@ export default function SupportPage() {
           </div>
           <Separator className="my-6" />
           <div className="text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} LIGAKU - Tournament Management System.
+            © {new Date().getFullYear()} LAGAKU - Platform Turnamen Mahasiswa.
             All rights reserved.
           </div>
         </div>

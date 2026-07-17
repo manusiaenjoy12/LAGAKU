@@ -27,6 +27,7 @@ import {
 
 interface Match {
   id: string;
+  kategori_lomba: string | null;
   status: "dijadwalkan" | "berlangsung" | "selesai";
   tanggal_pertandingan: string;
   waktu_pertandingan: string;
@@ -274,7 +275,7 @@ export default function MatchesList({
             </div>
             <CardTitle className="text-xl mb-2">Tidak ada pertandingan</CardTitle>
             <CardDescription className="text-gray-500 dark:text-gray-400">
-              Tidak ada pertandingan dengan status "{selectedStatus}" saat ini.
+              Tidak ada pertandingan dengan status &quot;{selectedStatus}&quot; saat ini.
             </CardDescription>
             <Button
               onClick={fetchMatches}
@@ -304,7 +305,7 @@ export default function MatchesList({
                         <CardTitle className="text-lg">{match.acara.nama}</CardTitle>
                         <CardDescription className="flex items-center">
                           <Trophy className="w-3 h-3 mr-1" />
-                          {match.round.nama}
+                          {match.round.nama} · {match.kategori_lomba || "Umum"}
                         </CardDescription>
                       </div>
                       <Badge 

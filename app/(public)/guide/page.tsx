@@ -33,7 +33,7 @@ export default function GuidePage() {
   const guides = {
     overview: [
       {
-        title: "Apa itu LigaKu?",
+        title: "Apa itu LAGAKU?",
         description: "Platform kompetisi esports terintegrasi untuk mahasiswa dengan sistem bracket otomatis, manajemen tim, dan tracking statistik.",
         icon: <Trophy className="h-5 w-5" />,
       },
@@ -116,7 +116,7 @@ export default function GuidePage() {
     faq: [
       {
         question: "Apakah sistem ini gratis?",
-        answer: "Ya, LigaKu sepenuhnya gratis untuk digunakan oleh mahasiswa dan organisasi kampus.",
+        answer: "Ya, LAGAKU sepenuhnya gratis untuk digunakan oleh mahasiswa dan organisasi kampus.",
       },
       {
         question: "Berapa maksimal anggota per tim?",
@@ -136,7 +136,7 @@ export default function GuidePage() {
       },
       {
         question: "Bagaimana cara kontak admin?",
-        answer: "Dapat menghubungi melalui email: admin@ligaku.ac.id atau melalui fitur chat di dashboard.",
+        answer: "Dapat menghubungi melalui email: support@lagaku.id atau melalui fitur chat di dashboard.",
       },
     ],
   };
@@ -187,7 +187,7 @@ export default function GuidePage() {
               Panduan Lengkap
             </Badge>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-              Panduan Sistem <span className="text-primary">LigaKu</span>
+              Panduan Sistem <span className="text-primary">LAGAKU</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
               Pelajari cara menggunakan platform kompetisi esports terbaik untuk mahasiswa. Mulai dari registrasi hingga menjadi juara!
@@ -278,7 +278,7 @@ export default function GuidePage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Alur Sistem LigaKu</CardTitle>
+                  <CardTitle>Alur Sistem LAGAKU</CardTitle>
                   <CardDescription>Proses lengkap dari awal hingga akhir turnamen</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -365,7 +365,7 @@ export default function GuidePage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Pertanyaan yang Sering Diajukan</CardTitle>
-                  <CardDescription>Cari jawaban untuk pertanyaan umum tentang LigaKu</CardDescription>
+                  <CardDescription>Cari jawaban untuk pertanyaan umum tentang LAGAKU</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
@@ -430,7 +430,7 @@ export default function GuidePage() {
                   </p>
                 </div>
                 <Button asChild size="lg" className="gap-2">
-                  <Link href="mailto:support@ligaku.ac.id">
+                  <Link href="mailto:support@lagaku.id">
                     <HelpCircle className="h-4 w-4" />
                     Hubungi Support
                   </Link>

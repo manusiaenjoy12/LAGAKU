@@ -106,7 +106,7 @@ export default function UnauthorizedPage() {
               <p className="text-xs text-muted-foreground">
                 Masih mengalami masalah?{" "}
                 <a
-                  href="mailto:support@ligaku.com"
+                  href="mailto:support@lagaku.id"
                   className="font-medium text-primary underline-offset-4 hover:text-primary/80 hover:underline"
                 >
                   Hubungi Dukungan
@@ -134,7 +134,7 @@ export default function UnauthorizedPage() {
       {/* Copyright */}
       <div className="absolute bottom-6 left-0 right-0 text-center animate-fade-in delay-700">
         <p className="text-xs text-muted-foreground">
-          © {new Date().getFullYear()} LIGAKU - Tournament Manager
+          © {new Date().getFullYear()} LAGAKU - Platform Turnamen Mahasiswa
         </p>
       </div>
     </div>

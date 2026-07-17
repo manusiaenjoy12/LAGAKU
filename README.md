@@ -1,6 +1,6 @@
-Ligaku - Platform Turnamen Olahraga
+LAGAKU - Platform Turnamen Mahasiswa
 
-Ligaku adalah platform turnamen olahraga digital yang memudahkan pengelolaan, partisipasi, dan pelacakan kompetisi olahraga dengan teknologi modern.
+LAGAKU adalah platform turnamen mahasiswa yang memudahkan pengelolaan, partisipasi, dan pelacakan kompetisi dengan teknologi modern.
 
 🚀 Fitur Utama
 📅 Halaman Utama (Dashboard)

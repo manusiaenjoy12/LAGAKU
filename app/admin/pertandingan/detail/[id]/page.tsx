@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import {
   Table,
@@ -15,8 +15,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, RefreshCw, ArrowLeft, TrendingUp } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { AlertCircle, RefreshCw, ArrowLeft, TrendingUp, Minus, Plus, Save } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface Acara {
   id: string;
@@ -53,6 +55,7 @@ interface Pertandingan {
   is_bye: boolean;
   tanggal_pertandingan: string | null;
   waktu_pertandingan: string | null;
+  kategori_lomba?: string | null;
   tim_a?: Tim;
   tim_b?: Tim;
   round?: Round;
@@ -74,9 +77,67 @@ interface StatsData {
   progressPercentage: number;
 }
 
+function InlineScoreInput({ match, onSaved }: { match: Pertandingan; onSaved: () => Promise<void> }) {
+  const [scoreA, setScoreA] = useState(match.skor_tim_a ?? 0);
+  const [scoreB, setScoreB] = useState(match.skor_tim_b ?? 0);
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    if (scoreA === scoreB) {
+      toast.error("Skor pertandingan sistem gugur tidak boleh seri.");
+      return;
+    }
+    const winnerId = scoreA > scoreB ? match.tim_a_id : match.tim_b_id;
+    if (!winnerId) {
+      toast.error("Kedua tim harus tersedia sebelum poin disimpan.");
+      return;
+    }
+
+    setSaving(true);
+    const supabase = createClient();
+    const { error } = await supabase.from("pertandingan").update({
+      skor_tim_a: scoreA,
+      skor_tim_b: scoreB,
+      status: "selesai",
+      pemenang_id: winnerId,
+    }).eq("id", match.id);
+
+    if (error) {
+      toast.error(error.message);
+      setSaving(false);
+      return;
+    }
+    toast.success("Poin dan pemenang berhasil disimpan.");
+    setSaving(false);
+    await onSaved();
+  };
+
+  const scoreControl = (value: number, setValue: (value: number) => void, label: string) => (
+    <div className="flex items-center gap-1">
+      <Button type="button" variant="outline" size="icon" className="h-7 w-7" onClick={() => setValue(Math.max(0, value - 1))} aria-label={`Kurangi poin ${label}`}>
+        <Minus className="h-3 w-3" />
+      </Button>
+      <Input type="number" min={0} value={value} onChange={(event) => setValue(Math.max(0, Number(event.target.value)))} className="h-8 w-12 px-1 text-center font-bold tabular-nums" aria-label={`Poin ${label}`} />
+      <Button type="button" variant="outline" size="icon" className="h-7 w-7" onClick={() => setValue(value + 1)} aria-label={`Tambah poin ${label}`}>
+        <Plus className="h-3 w-3" />
+      </Button>
+    </div>
+  );
+
+  return (
+    <div className="flex min-w-max items-center justify-center gap-2">
+      {scoreControl(scoreA, setScoreA, match.tim_a?.nama || "Tim A")}
+      <span className="text-muted-foreground">:</span>
+      {scoreControl(scoreB, setScoreB, match.tim_b?.nama || "Tim B")}
+      <Button type="button" size="sm" onClick={save} disabled={saving} className="ml-1 gap-1">
+        <Save className="h-3.5 w-3.5" /> {saving ? "..." : "Simpan"}
+      </Button>
+    </div>
+  );
+}
+
 export default function BracketPage() {
   const params = useParams();
-  const router = useRouter();
   const supabase = createClient();
   const acaraId = params.id as string;
 
@@ -884,13 +945,13 @@ export default function BracketPage() {
 
                                 {/* Skor */}
                                 <TableCell className="text-center">
-                                  <div className="font-bold text-lg text-gray-900 dark:text-gray-100">
-                                    {match.skor_tim_a ?? "-"}
-                                    <span className="mx-2 text-gray-400 dark:text-gray-500">
-                                      :
-                                    </span>
-                                    {match.skor_tim_b ?? "-"}
-                                  </div>
+                                  {!match.is_bye && !match.id.includes("placeholder") ? (
+                                    <InlineScoreInput match={match} onSaved={fetchBracketData} />
+                                  ) : (
+                                    <div className="font-bold text-lg text-gray-900 dark:text-gray-100">
+                                      {match.skor_tim_a ?? "-"} : {match.skor_tim_b ?? "-"}
+                                    </div>
+                                  )}
                                   {(teamAInfo.isBye || teamBInfo.isBye) && (
                                     <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                                       {teamAInfo.isBye
@@ -916,23 +977,9 @@ export default function BracketPage() {
 
                                 {/* Aksi */}
                                 <TableCell className="text-right">
-                                  <div className="flex justify-end">
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() =>
-                                        router.push(
-                                          `/admin/pertandingan/edit/${match.id}`,
-                                        )
-                                      }
-                                      disabled={match.id.includes(
-                                        "placeholder",
-                                      )}
-                                      className="border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                    >
-                                      Edit
-                                    </Button>
-                                  </div>
+                                  <span className="text-xs text-muted-foreground">
+                                    {match.is_bye ? "Otomatis" : match.status === "selesai" ? "Tersimpan" : "Isi skor"}
+                                  </span>
                                 </TableCell>
                               </TableRow>
                             );

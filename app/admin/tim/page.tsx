@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,21 @@ import TimTable, { Tim } from "@/components/admin/tim/DataTable";
 import { toast } from "sonner";
 import DetailAnggotaModal from "@/components/admin/tim/DetailDialogAnggota";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Search, X } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
+
+interface TimQueryRow {
+  id: string;
+  nama: string;
+  jurusan: string | null;
+  angkatan: string | null;
+  nomor_hp: string | null;
+  dibuat_pada: string;
+  acara: { id: string; nama: string } | Array<{ id: string; nama: string }> | null;
+  anggota_tim: Array<{ count: number }> | null;
+}
 
 export default function TimPage() {
   const router = useRouter();
@@ -18,6 +31,18 @@ export default function TimPage() {
   const [timList, setTimList] = useState<Tim[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTimId, setSelectedTimId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+
+  const filteredTim = useMemo(() => {
+    const keyword = search.trim().toLocaleLowerCase("id-ID");
+    if (!keyword) return timList;
+
+    return timList.filter((tim) =>
+      [tim.nama, tim.acara_nama, tim.jurusan, tim.angkatan, tim.nomor_hp]
+        .filter(Boolean)
+        .some((value) => String(value).toLocaleLowerCase("id-ID").includes(keyword)),
+    );
+  }, [search, timList]);
 
   // ================================================
   // LOAD DATA TIM + JUMLAH ANGGOTA + ACARA
@@ -50,16 +75,19 @@ export default function TimPage() {
       return;
     }
 
-    const formatted: Tim[] = data.map((item: any) => ({
-      id: item.id,
-      nama: item.nama,
-      jurusan: item.jurusan,
-      angkatan: item.angkatan,
-      nomor_hp: item.nomor_hp,
-      dibuat_pada: item.dibuat_pada,
-      jumlah_pemain: item.anggota_tim?.[0]?.count || 0,
-      acara_nama: item.acara?.nama || "-",
-    }));
+    const formatted: Tim[] = (data as unknown as TimQueryRow[]).map((item) => {
+      const acara = Array.isArray(item.acara) ? item.acara[0] : item.acara;
+      return {
+        id: item.id,
+        nama: item.nama,
+        jurusan: item.jurusan || undefined,
+        angkatan: item.angkatan || undefined,
+        nomor_hp: item.nomor_hp || undefined,
+        dibuat_pada: item.dibuat_pada,
+        jumlah_pemain: item.anggota_tim?.[0]?.count || 0,
+        acara_nama: acara?.nama || "-",
+      };
+    });
 
     setTimList(formatted);
     setLoading(false);
@@ -177,6 +205,36 @@ export default function TimPage() {
         </Link>
       </div>
 
+      <div className="mb-4 rounded-xl border bg-card p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative w-full sm:max-w-md">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Cari nama tim, acara, jurusan, angkatan..."
+              className="pl-9 pr-9"
+              aria-label="Cari tim"
+            />
+            {search && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => setSearch("")}
+                className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+                aria-label="Hapus pencarian"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          <p className="whitespace-nowrap text-sm text-muted-foreground">
+            Menampilkan {filteredTim.length} dari {timList.length} tim
+          </p>
+        </div>
+      </div>
+
       {/* LOADING SKELETON */}
       {loading ? (
         <div className="space-y-3">
@@ -187,7 +245,7 @@ export default function TimPage() {
         </div>
       ) : (
         <TimTable
-          data={timList}
+          data={filteredTim}
           onDelete={handleDelete}
           onDetail={handleDetail}
           onEdit={(tim) => router.push(`/admin/tim/edit/${tim.id}`)}

@@ -274,6 +274,7 @@ export interface Round {
 export interface Pertandingan {
   id: string;
   posisi?: number;
+  kategori_lomba?: string;
   status: EnumStatusMatch;
   tanggal_pertandingan?: string;
   waktu_pertandingan?: string;
@@ -404,6 +405,7 @@ export interface FormState {
   acara_id: string;
   tanggal_pertandingan: string;
   waktu_pertandingan: string;
+  kategori_lomba: string;
 }
 
 // =======================================================

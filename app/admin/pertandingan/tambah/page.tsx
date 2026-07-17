@@ -53,7 +53,10 @@ export default function TambahPertandinganPage() {
     acara_id: "",
     tanggal_pertandingan: "",
     waktu_pertandingan: "",
+    kategori_lomba: "Umum",
   });
+
+  const MAX_BRACKET_TEAMS = 32;
 
   // ================= LOAD ACARA =================
   useEffect(() => {
@@ -133,7 +136,7 @@ export default function TambahPertandinganPage() {
     // Calculate rounds
     let rounds = 0;
     let remainingMatches = bracketSize / 2;
-    let roundNames = [];
+    const roundNames = [];
     
     while (remainingMatches >= 1) {
       rounds++;
@@ -163,6 +166,11 @@ export default function TambahPertandinganPage() {
 
     if (timList.length < 2) {
       alert("Minimal 2 tim diperlukan untuk membuat bracket");
+      return;
+    }
+
+    if (timList.length > MAX_BRACKET_TEAMS) {
+      alert(`Maksimal ${MAX_BRACKET_TEAMS} tim untuk satu bracket. Kurangi ${timList.length - MAX_BRACKET_TEAMS} tim terlebih dahulu.`);
       return;
     }
 
@@ -232,11 +240,16 @@ export default function TambahPertandinganPage() {
           .eq("status", "dijadwalkan");
       }
 
+      await supabase
+        .from("pertandingan")
+        .update({ kategori_lomba: form.kategori_lomba.trim() || "Umum" })
+        .eq("acara_id", form.acara_id);
+
       // Show success message
       alert('✅ Bracket berhasil digenerate!');
       
       // Navigate to bracket page
-      router.push(`/admin//bracket/${form.acara_id}`);
+      router.push(`/admin/bracket/${form.acara_id}`);
       router.refresh();
 
     } catch (error) {
@@ -432,6 +445,15 @@ export default function TambahPertandinganPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Kategori Lomba</Label>
+                    <Input
+                      value={form.kategori_lomba}
+                      onChange={(e) => setForm((f) => ({ ...f, kategori_lomba: e.target.value }))}
+                      placeholder="Contoh: Futsal Putra, Mobile Legends, Basket"
+                      maxLength={60}
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
@@ -484,8 +506,8 @@ export default function TambahPertandinganPage() {
               <CardContent className="space-y-4">
                 <Button
                   onClick={handleGenerateBracket}
-                  disabled={!form.acara_id || saving || timList.length < 2}
-                  className="w-full h-12 text-base bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                  disabled={!form.acara_id || saving || timList.length < 2 || timList.length > MAX_BRACKET_TEAMS}
+                  className="h-auto min-h-12 w-full min-w-0 whitespace-normal px-3 py-3 text-center text-sm leading-tight sm:text-base bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
                   size="lg"
                 >
                   {saving ? (
@@ -506,6 +528,15 @@ export default function TambahPertandinganPage() {
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
                       Minimal 2 tim diperlukan untuk membuat bracket
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {timList.length > MAX_BRACKET_TEAMS && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Maksimal {MAX_BRACKET_TEAMS} tim. Saat ini ada {timList.length} tim aktif.
                     </AlertDescription>
                   </Alert>
                 )}
