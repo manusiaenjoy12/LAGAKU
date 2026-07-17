@@ -9,7 +9,9 @@ import { toast } from "sonner";
 import DetailAnggotaModal from "@/components/admin/tim/DetailDialogAnggota";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
-import { Search, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { CalendarDays, RotateCcw, Search, SlidersHorizontal, X } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
 
@@ -20,7 +22,7 @@ interface TimQueryRow {
   angkatan: string | null;
   nomor_hp: string | null;
   dibuat_pada: string;
-  acara: { id: string; nama: string } | Array<{ id: string; nama: string }> | null;
+  acara: { id: string; nama: string; tanggal_mulai_pertandingan: string | null } | Array<{ id: string; nama: string; tanggal_mulai_pertandingan: string | null }> | null;
   anggota_tim: Array<{ count: number }> | null;
 }
 
@@ -32,17 +34,32 @@ export default function TimPage() {
   const [loading, setLoading] = useState(true);
   const [selectedTimId, setSelectedTimId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [acaraFilter, setAcaraFilter] = useState("semua");
+  const [jurusanFilter, setJurusanFilter] = useState("semua");
+  const [tanggalFilter, setTanggalFilter] = useState("");
+  const pageSize = 10;
 
   const filteredTim = useMemo(() => {
     const keyword = search.trim().toLocaleLowerCase("id-ID");
-    if (!keyword) return timList;
-
-    return timList.filter((tim) =>
-      [tim.nama, tim.acara_nama, tim.jurusan, tim.angkatan, tim.nomor_hp]
+    return timList.filter((tim) => {
+      const matchesSearch = [tim.nama, tim.acara_nama, tim.jurusan, tim.angkatan, tim.nomor_hp]
         .filter(Boolean)
-        .some((value) => String(value).toLocaleLowerCase("id-ID").includes(keyword)),
-    );
-  }, [search, timList]);
+        .some((value) => String(value).toLocaleLowerCase("id-ID").includes(keyword));
+      return matchesSearch
+        && (acaraFilter === "semua" || tim.acara_nama === acaraFilter)
+        && (jurusanFilter === "semua" || tim.jurusan === jurusanFilter)
+        && (!tanggalFilter || tim.acara_tanggal?.slice(0, 10) === tanggalFilter);
+    });
+  }, [acaraFilter, jurusanFilter, search, tanggalFilter, timList]);
+  const acaraOptions = [...new Set(timList.map((tim) => tim.acara_nama).filter((value): value is string => Boolean(value && value !== "-")))].sort();
+  const jurusanOptions = [...new Set(timList.map((tim) => tim.jurusan).filter((value): value is string => Boolean(value)))].sort();
+  const totalPages = Math.max(1, Math.ceil(filteredTim.length / pageSize));
+  const paginatedTim = filteredTim.slice((page - 1) * pageSize, page * pageSize);
+  const activeFilters = [search, acaraFilter !== "semua", jurusanFilter !== "semua", tanggalFilter].filter(Boolean).length;
+  const resetFilters = () => {
+    setSearch(""); setAcaraFilter("semua"); setJurusanFilter("semua"); setTanggalFilter(""); setPage(1);
+  };
 
   // ================================================
   // LOAD DATA TIM + JUMLAH ANGGOTA + ACARA
@@ -62,7 +79,8 @@ export default function TimPage() {
         dibuat_pada,
         acara:acara_id (
           id,
-          nama
+          nama,
+          tanggal_mulai_pertandingan
         ),
         anggota_tim(count)
       `,
@@ -86,6 +104,7 @@ export default function TimPage() {
         dibuat_pada: item.dibuat_pada,
         jumlah_pemain: item.anggota_tim?.[0]?.count || 0,
         acara_nama: acara?.nama || "-",
+        acara_tanggal: acara?.tanggal_mulai_pertandingan || undefined,
       };
     });
 
@@ -205,13 +224,18 @@ export default function TimPage() {
         </Link>
       </div>
 
-      <div className="mb-4 rounded-xl border bg-card p-4">
+      <div className="mb-5 overflow-hidden rounded-xl border border-blue-200/70 bg-card shadow-sm dark:border-blue-900/70">
+        <div className="flex flex-col gap-3 border-b bg-linear-to-r from-blue-50 to-cyan-50 px-5 py-4 dark:from-blue-950/40 dark:to-cyan-950/30 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3"><div className="rounded-xl bg-blue-600 p-2 text-white"><SlidersHorizontal className="h-5 w-5" /></div><div><h2 className="font-bold">Filter Data Tim</h2><p className="text-xs text-muted-foreground">Cari tim berdasarkan acara, jurusan, dan tanggal.</p></div></div>
+          <div className="flex items-center gap-2">{activeFilters > 0 && <span className="rounded-full bg-blue-600 px-2.5 py-1 text-xs font-semibold text-white">{activeFilters} filter aktif</span>}<Button variant="outline" size="sm" onClick={resetFilters} disabled={activeFilters === 0} className="gap-1.5"><RotateCcw className="h-3.5 w-3.5" /> Reset</Button></div>
+        </div>
+        <div className="p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative w-full sm:max-w-md">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => { setSearch(event.target.value); setPage(1); }}
               placeholder="Cari nama tim, acara, jurusan, angkatan..."
               className="pl-9 pr-9"
               aria-label="Cari tim"
@@ -221,7 +245,7 @@ export default function TimPage() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                onClick={() => setSearch("")}
+                onClick={() => { setSearch(""); setPage(1); }}
                 className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
                 aria-label="Hapus pencarian"
               >
@@ -232,6 +256,18 @@ export default function TimPage() {
           <p className="whitespace-nowrap text-sm text-muted-foreground">
             Menampilkan {filteredTim.length} dari {timList.length} tim
           </p>
+        </div>
+        <div className="mt-5 grid gap-4 sm:grid-cols-3">
+          <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Acara yang Diikuti</Label><Select value={acaraFilter} onValueChange={(value) => { setAcaraFilter(value); setPage(1); }}>
+            <SelectTrigger><SelectValue placeholder="Acara yang diikuti" /></SelectTrigger>
+            <SelectContent><SelectItem value="semua">Semua Acara</SelectItem>{acaraOptions.map((value) => <SelectItem key={value} value={value}>{value}</SelectItem>)}</SelectContent>
+          </Select></div>
+          <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Jurusan</Label><Select value={jurusanFilter} onValueChange={(value) => { setJurusanFilter(value); setPage(1); }}>
+            <SelectTrigger><SelectValue placeholder="Filter jurusan" /></SelectTrigger>
+            <SelectContent><SelectItem value="semua">Semua Jurusan</SelectItem>{jurusanOptions.map((value) => <SelectItem key={value} value={value}>{value}</SelectItem>)}</SelectContent>
+          </Select></div>
+          <div className="space-y-2"><Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tanggal Acara</Label><div className="relative"><CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input type="date" value={tanggalFilter} onChange={(event) => { setTanggalFilter(event.target.value); setPage(1); }} aria-label="Filter tanggal acara" className="pl-9" /></div></div>
+        </div>
         </div>
       </div>
 
@@ -245,11 +281,25 @@ export default function TimPage() {
         </div>
       ) : (
         <TimTable
-          data={filteredTim}
+          data={paginatedTim}
+          startIndex={(page - 1) * pageSize}
           onDelete={handleDelete}
           onDetail={handleDetail}
           onEdit={(tim) => router.push(`/admin/tim/edit/${tim.id}`)}
         />
+      )}
+
+      {!loading && filteredTim.length > 0 && (
+        <div className="mt-4 flex flex-col items-center justify-between gap-3 rounded-xl border bg-card p-4 sm:flex-row">
+          <p className="text-sm text-muted-foreground">Halaman {page} dari {totalPages}</p>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>Sebelumnya</Button>
+            {Array.from({ length: totalPages }, (_, index) => index + 1).slice(Math.max(0, page - 3), Math.max(5, page + 2)).map((number) => (
+              <Button key={number} size="sm" variant={number === page ? "default" : "outline"} onClick={() => setPage(number)} className="min-w-9">{number}</Button>
+            ))}
+            <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>Berikutnya</Button>
+          </div>
+        </div>
       )}
 
       {/* DETAIL MODAL */}
